@@ -100,3 +100,32 @@ Before implementing a substantial feature:
 6. summarize changed files and any unresolved issue
 
 Do not silently change product direction.
+
+## Repository Working Agreement
+
+Prioritize user safety, correct behavior, maintainable code, mobile accessibility, and fast delivery—in that order. Keep the established Next.js, TypeScript, Tailwind, Supabase, MapLibre, and Vercel architecture. Authorization must be enforced through RLS, not only through hidden UI.
+
+Before substantial work, define the smallest complete vertical slice, identify the affected files and systems, separate unrelated cleanup, implement one coherent change, and run the relevant checks. Concurrent agents must receive non-overlapping ownership, avoid files owned by another active agent, and report changed files, validation, assumptions, and blockers without committing unfinished shared work.
+
+Keep commits small and independently understandable. Each commit should contain one feature, fix, migration, or infrastructure concern; include its tests or migrations; use path-specific staging instead of `git add .`; and be reviewed with `git diff --cached`. Use Conventional Commit messages such as `feat: add campus activity feed`, `fix: enforce post ownership`, `docs: document Supabase setup`, `test: cover post validation`, and `chore: configure deployment checks`.
+
+Run the relevant quality gates before completing work:
+
+```bash
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+```
+
+Database changes must verify RLS, `auth.uid()` ownership, anonymous and authenticated behavior, storage isolation, and ordered migrations. Never commit secrets, `.env.local`, build output, dependencies, personal skills, or local agent runtime configuration. Project-level `AGENTS.md` files are intentionally committed as shared repository standards.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
