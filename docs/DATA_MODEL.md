@@ -16,11 +16,6 @@ created_at timestamptz not null default now(),
 updated_at timestamptz not null default now()
 ```
 
-Possible later fields:
-- bio
-- program
-- graduation_year
-
 Avoid collecting more personal data than the product needs.
 
 ## `campus_locations`
@@ -81,13 +76,113 @@ Possible MVP values:
 
 However, product direction favors treating Heads Up / Spotted as a unified activity concept. A category can remain optional until there is a real UX reason to expose it.
 
-## Future Tables — Not Required for MVP
+## Data Operations
 
-Potential later tables:
-- `comments`
-- `reactions`
-- `post_reports`
-- `saved_posts`
-- `notifications`
+With Supabase, much of the app may use database queries directly through the Supabase client rather than a large custom REST layer.
 
-Do not create them preemptively.
+These contracts describe the logical operations the frontend needs.
+
+### Get Recent Posts
+
+Input:
+- optional limit
+- optional cursor/page
+- optional map bounds
+- optional location
+
+Output fields:
+- post id
+- body
+- category if used
+- created_at
+- author summary
+- image reference/url
+- location label
+- latitude/longitude
+
+Default sort:
+- newest first
+
+### Get Post By ID
+
+Input:
+- post id
+
+Output:
+- complete post
+- author summary
+- location information
+
+### Create Post
+
+Authenticated.
+
+Input:
+```ts
+{
+  body: string;
+  locationId?: string;
+  latitude?: number;
+  longitude?: number;
+  imagePath?: string;
+  category?: string;
+}
+```
+
+Validation:
+- non-empty body
+- acceptable max length
+- valid location
+- supported image type/size if image exists
+
+### Delete Post
+
+Authenticated.
+
+Input:
+- post id
+
+Authorization:
+- database policy must enforce `author_id = auth.uid()`
+
+### Get Profile
+
+Input:
+- user id
+
+Output:
+- id
+- display name
+- avatar
+- recent posts
+
+### Update Own Profile
+
+Authenticated.
+
+Allowed:
+- fields explicitly supported by UI
+
+Not allowed:
+- changing user id
+- modifying another profile
+
+### Error Handling
+
+UI should translate raw backend failures into understandable messages.
+
+Do not expose:
+- service-role secrets
+- stack traces
+- internal SQL details
+
+## Decisions Required Before Implementation
+
+These are proposed operations, not implemented API guarantees. Record decisions in `DECISIONS.md` before implementing the affected feature:
+
+- Whether public browsing includes both posts and profiles.
+- Whether posts require a predefined location or may use coordinates alone.
+- Exact body length, supported image types, and upload size limits.
+- Pagination cursor format and error/result types.
+
+Keep validation, database constraints, and UI behavior consistent with those decisions.

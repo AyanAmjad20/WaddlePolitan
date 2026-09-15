@@ -30,7 +30,7 @@ Supabase Auth should be preferred.
 - basic pagination or load-more
 - time
 - user identity/display name if available
-- optional image
+- optional image (upload support is required; attaching a photo is optional)
 - location label
 - link/open behavior into detail/map context
 
@@ -38,7 +38,7 @@ Supabase Auth should be preferred.
 Minimum fields:
 - text/body
 - campus location
-- optional image
+- optional image (upload support is required; attaching a photo is optional)
 
 Optional:
 - simple category such as `spotted`, `heads_up`, or a unified category model
@@ -90,3 +90,11 @@ Do not block MVP on:
 - AI features
 - gamification
 - advanced analytics
+
+## Additional Product Non-Goals
+
+Outside the MVP: a full anonymous social network, stories, marketplace, event ticketing, class scheduling, and advanced reputation systems.
+
+## Later Ideas
+
+Consider campus events, verified clubs/organizations, notifications, richer discovery, school-specific utilities, and activation/retention analytics only when student feedback supports them. Other deferred features are listed above. Prioritize repeated student needs over technically interesting infrastructure.

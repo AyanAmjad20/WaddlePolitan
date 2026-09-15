@@ -32,7 +32,7 @@ Do not make Lost & Found a blocker for MVP.
 ## D006 — Image uploads are valuable for MVP
 Status: Accepted
 
-The create flow should support an optional image if feasible within the current implementation.
+The MVP must support image uploads. Attaching an image is optional for the student.
 
 ## D007 — Use Supabase for backend primitives
 Status: Accepted
@@ -56,11 +56,9 @@ Status: Accepted
 A dedicated heavy Java backend is unnecessary for the current MVP when Supabase and a React/Next.js frontend can satisfy requirements.
 
 ## D010 — Frontend framework
-Status: Open / repository-dependent
+Status: Accepted
 
-Next.js is a strong option, but the correct choice should respect the current repository.
-
-Do not rewrite a working React project merely to switch frameworks.
+Use the existing Next.js App Router, React, TypeScript, and Tailwind foundation.
 
 ## D011 — Visual style
 Status: Accepted
@@ -71,3 +69,8 @@ Use a polished, navy-dominant interface with restrained yellow accents and a mos
 Status: Accepted
 
 Ownership-sensitive actions such as deleting posts must be enforced with RLS, not just frontend checks.
+
+## D013 — Map and hosting
+Status: Accepted
+
+Use MapLibre for the map and Vercel for frontend hosting, as established in `AGENTS.md`. Supabase provides the hosted backend. These choices do not imply those integrations are already implemented or configured.

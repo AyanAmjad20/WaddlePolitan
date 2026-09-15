@@ -4,7 +4,7 @@
 
 Use the minimum architecture required to ship a reliable campus web app.
 
-## Suggested High-Level Architecture
+## High-Level Architecture
 
 ```text
 Browser
@@ -23,11 +23,11 @@ Where server-side application logic is necessary, use the framework's normal ser
 
 ## Frontend
 
-Preferred:
+Established stack:
 - TypeScript
 - React
-- Next.js if the existing repository uses it or the project is still early
-- Tailwind CSS if present
+- Next.js App Router
+- Tailwind CSS
 
 Responsibilities:
 - page rendering
@@ -64,13 +64,7 @@ Prefer the simpler option unless realtime behavior is already straightforward.
 
 Keep map implementation isolated behind reusable components.
 
-The exact provider may be:
-- Mapbox
-- MapLibre
-- Leaflet with a suitable tile provider
-- another provider already used by the repository
-
-Do not change providers without a reason.
+Use MapLibre for the campus map, consistent with `AGENTS.md`. Select a suitable tile/style provider during map implementation.
 
 ## Security Boundary
 
@@ -94,3 +88,7 @@ Do not introduce for MVP:
 - event sourcing
 - CQRS
 - custom auth
+
+Also outside the MVP: distributed caching, elaborate backend-for-frontend layers, GraphQL migrations for their own sake, complex domain-driven architecture, premature performance optimization, custom file storage, and self-hosted Supabase.
+
+If an implementation adds substantial complexity without improving the core student experience, reconsider a simpler design.

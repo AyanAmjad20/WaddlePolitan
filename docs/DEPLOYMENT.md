@@ -4,14 +4,15 @@
 
 Keep deployment boring and cheap.
 
-## Suggested Setup
+## Target Setup
 
 Frontend:
-- Vercel is a natural option for Next.js
-- Netlify or another simple host is also acceptable if it matches the repository
+- Vercel for Next.js
 
 Backend:
 - Supabase hosted project
+
+Hosting configuration has not been verified. Add concrete environment setup and release instructions when deployment is configured.
 
 ## Minimal CI
 

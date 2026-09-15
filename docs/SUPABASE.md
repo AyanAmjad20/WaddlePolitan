@@ -34,7 +34,7 @@ MVP options:
 - magic link
 - OAuth if already configured
 
-Do not block the project on school SSO.
+Choose and record the authentication method in `DECISIONS.md` before implementing auth. Do not block the project on school SSO.
 
 ## Row Level Security
 

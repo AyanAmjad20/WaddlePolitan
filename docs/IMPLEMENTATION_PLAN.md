@@ -2,6 +2,12 @@
 
 This plan is ordered to get to a shareable MVP quickly.
 
+## Current Baseline
+
+At documentation consolidation, the Desktop WaddlePolitan repository contains the Next.js starter, project documentation, and design references. Product pages, the map, Supabase integration/migrations, and tests still need implementation here. The deleted Downloads copy was not consolidated into this repository.
+
+The phases below are planned work, not a record of completed features. Track completion as each working feature is verified.
+
 ## Phase 0 — Inspect Existing Repository
 
 Before new implementation:

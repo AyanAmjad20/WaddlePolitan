@@ -59,11 +59,12 @@ Current intended backend/platform:
 Frontend direction:
 - TypeScript
 - React-based web frontend
-- Next.js is a reasonable preferred choice if the repository already uses it or is still early
-- If the existing repository already uses another React setup, do not rewrite it solely for preference
+- Next.js App Router is the established framework
 
 Styling:
-- Tailwind CSS is preferred if already present
+- Tailwind CSS is established
+
+Treat current code as the source of truth for existing implementation, and documentation as the source of truth for product direction. Planned features are not evidence of completed functionality.
 
 ## Canonical Documentation
 
@@ -75,13 +76,10 @@ Read:
 - `docs/ARCHITECTURE.md`
 - `docs/DATA_MODEL.md`
 - `docs/SUPABASE.md`
-- `docs/API_CONTRACTS.md`
 - `docs/IMPLEMENTATION_PLAN.md`
 - `docs/TESTING.md`
 - `docs/DEPLOYMENT.md`
 - `docs/DECISIONS.md`
-- `docs/NON_GOALS.md`
-- `docs/ROADMAP.md`
 
 If documents conflict, prefer:
 1. explicit user instructions in the current Codex session
