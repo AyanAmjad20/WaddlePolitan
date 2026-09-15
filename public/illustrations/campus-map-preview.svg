@@ -1,0 +1,20 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Illustrative TMU campus map</title>
+  <desc id="desc">A simplified navy campus map with campus paths, buildings, and yellow animal sighting pins.</desc>
+  <rect width="1200" height="760" rx="28" fill="#EDF2F7"/>
+  <path d="M0 162H1200M0 502H1200M180 0V760M946 0V760" stroke="#D8E0EA" stroke-width="18"/>
+  <path d="M40 665C267 520 316 225 535 125C723 39 826 176 1160 86M59 90C317 240 425 400 1146 654" stroke="#B8DCC8" stroke-width="22" opacity=".8"/>
+  <path d="M50 665C267 520 316 225 535 125C723 39 826 176 1160 86M59 90C317 240 425 400 1146 654" stroke="#8DC69D" stroke-width="2" stroke-dasharray="8 10"/>
+  <g fill="#4E83B9" stroke="#3E6F9F" stroke-width="3">
+    <path d="M108 69h181l18 92-42 53-146-12-32-56 21-77Z"/><path d="M356 48h169l22 146-44 36-134-35-18-86 5-61Z"/>
+    <path d="M615 73h163l28 121-51 69-137-35-28-74 25-81Z"/><path d="M838 49h150l34 104-55 63-119-20-23-86 13-61Z"/>
+    <path d="M143 290h176l35 110-49 82-164-20-24-85 26-87Z"/><path d="M393 267h145l35 158-44 67-133-30-21-108 18-87Z"/>
+    <path d="M622 299h144l30 136-42 72-141-29-18-91 27-88Z"/><path d="M848 278h176l24 141-49 80-160-35-22-100 31-86Z"/>
+    <path d="M128 548h184l20 117-45 54-141-14-27-76 9-81Z"/><path d="M382 514h155l29 143-48 52-132-27-23-95 19-73Z"/>
+    <path d="M625 538h157l29 119-46 63-148-22-21-86 29-74Z"/><path d="M857 516h180l26 120-47 63-155-15-27-90 23-78Z"/>
+  </g>
+  <g fill="#142943" font-family="Arial, sans-serif" font-size="19" font-weight="700" text-anchor="middle"><text x="197" y="131">YNG</text><text x="440" y="130">KHW</text><text x="697" y="142">KHE</text><text x="909" y="121">SHE</text><text x="223" y="363">POD</text><text x="460" y="358">RAC</text><text x="694" y="378">LIB</text><text x="933" y="359">RCC</text><text x="220" y="614">SLC</text><text x="460" y="596">CED</text><text x="700" y="608">IMA</text><text x="942" y="593">ENG</text></g>
+  <g fill="#FFD449" stroke="white" stroke-width="8"><circle cx="459" cy="337" r="27"/><circle cx="742" cy="233" r="27"/><circle cx="277" cy="475" r="27"/><circle cx="789" cy="511" r="27"/></g>
+  <g fill="#102B53" font-family="Arial, sans-serif" font-size="20" font-weight="700" text-anchor="middle"><text x="459" y="344">1</text><text x="742" y="240">2</text><text x="277" y="482">3</text><text x="789" y="518">1</text></g>
+  <g fill="#65748A" font-family="Arial, sans-serif" font-size="16"><text x="45" y="150">Gerrard St E</text><text x="981" y="488">Gould St</text><text x="43" y="736">Dundas St E</text></g>
+</svg>
