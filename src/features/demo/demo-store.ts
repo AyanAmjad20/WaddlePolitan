@@ -11,6 +11,11 @@ export const DEMO_STORAGE_KEY = "waddlepolitan.demo.v1";
 const DEMO_STORAGE_VERSION = 1;
 const MAX_PHOTOS = 3;
 const MAX_PHOTO_DATA_URL_LENGTH = 900_000;
+const MAX_NOTES_LENGTH = 500;
+const MAX_LOCATION_LABEL_LENGTH = 100;
+const ACTIVE_WINDOW_MS = 60 * 60_000;
+const MAX_FUTURE_OBSERVATION_MS = 5 * 60_000;
+const IMAGE_DATA_URL = /^data:image\/(?:jpeg|png|webp);base64,[a-z0-9+/]+={0,2}$/i;
 
 export const DEMO_USER: DemoProfile = {
   id: "demo-alex",
@@ -242,7 +247,7 @@ function buildSeedData(now: number): PersistedDemoData {
     initialized: true,
     seededAt: createdAt,
     profile: { ...DEMO_USER },
-    signedIn: true,
+    signedIn: false,
     submissions: {},
     sightings: [
       {
@@ -256,6 +261,32 @@ function buildSeedData(now: number): PersistedDemoData {
         notes: "A small group near the benches.",
         photos: [],
         observedAt: minutesAgo(4),
+        createdAt,
+      },
+      {
+        id: "seed-goose-kerr-overlap",
+        author: { id: "student-noah", displayName: "Noah Patel" },
+        animalType: "goose",
+        count: 6,
+        latitude: 43.65776,
+        longitude: -79.37925,
+        locationLabel: "Kerr Hall quad",
+        notes: "The group is still near the benches.",
+        photos: [],
+        observedAt: minutesAgo(6),
+        createdAt,
+      },
+      {
+        id: "seed-goose-kerr-nearby",
+        author: { id: "student-riley", displayName: "Riley Morgan" },
+        animalType: "goose",
+        count: 5,
+        latitude: 43.65781,
+        longitude: -79.37919,
+        locationLabel: "Kerr Hall quad",
+        notes: "Near the west path.",
+        photos: [],
+        observedAt: minutesAgo(8),
         createdAt,
       },
       {
@@ -328,7 +359,7 @@ function storageError(error: unknown): DemoStoreError {
   );
 }
 
-function validateDraft(draft: SightingDraft): void {
+function validateDraft(draft: SightingDraft, now: number): void {
   if (!isAnimalType(draft.animalType)) {
     throw new DemoStoreError("validation", "Choose goose, pigeon, or other.");
   }
@@ -341,14 +372,26 @@ function validateDraft(draft: SightingDraft): void {
   if (!Number.isFinite(draft.longitude) || draft.longitude < -180 || draft.longitude > 180) {
     throw new DemoStoreError("validation", "Choose a valid map longitude.");
   }
-  if (draft.observedAt && !isIsoDate(draft.observedAt)) {
-    throw new DemoStoreError("validation", "Choose a valid observation time.");
+  const observedAt = draft.observedAt ?? new Date(now).toISOString();
+  const observedAtTime = Date.parse(observedAt);
+  if (
+    !Number.isFinite(observedAtTime) ||
+    observedAtTime < now - ACTIVE_WINDOW_MS ||
+    observedAtTime > now + MAX_FUTURE_OBSERVATION_MS
+  ) {
+    throw new DemoStoreError("validation", "Choose an observation time from the last hour.");
+  }
+  if ((draft.locationLabel?.trim().length ?? 0) > MAX_LOCATION_LABEL_LENGTH) {
+    throw new DemoStoreError("validation", "Keep the location label under 100 characters.");
+  }
+  if ((draft.notes?.trim().length ?? 0) > MAX_NOTES_LENGTH) {
+    throw new DemoStoreError("validation", "Keep notes under 500 characters.");
   }
   if ((draft.photos?.length ?? 0) > MAX_PHOTOS) {
     throw new DemoStoreError("validation", `Add up to ${MAX_PHOTOS} photos.`);
   }
   for (const photo of draft.photos ?? []) {
-    if (!photo.startsWith("data:image/") || photo.length > MAX_PHOTO_DATA_URL_LENGTH) {
+    if (!IMAGE_DATA_URL.test(photo) || photo.length > MAX_PHOTO_DATA_URL_LENGTH) {
       throw new DemoStoreError(
         "validation",
         "Use a compressed image under the prototype photo size limit.",
@@ -368,7 +411,7 @@ export function getLastSeenAt(sighting: Sighting, confirmations: readonly Confir
 }
 
 export function isSightingActive(sighting: Sighting, confirmations: readonly Confirmation[], now = Date.now()): boolean {
-  return now - Date.parse(getLastSeenAt(sighting, confirmations)) <= 60 * 60_000;
+  return now - Date.parse(getLastSeenAt(sighting, confirmations)) <= ACTIVE_WINDOW_MS;
 }
 
 export function formatRelativeTime(timestamp: string, now = Date.now()): string {
@@ -387,10 +430,27 @@ export function createDemoStore(options: CreateDemoStoreOptions = {}): DemoStore
   let snapshot = SERVER_SNAPSHOT;
   let hydrated = false;
   let storageListenerAttached = false;
+  let persistenceMode: "persistent" | "session" | "corrupt" = storage ? "persistent" : "session";
   const listeners = new Set<() => void>();
 
+  const persistenceWarning = (): DemoStoreError | null => {
+    if (persistenceMode === "session") {
+      return new DemoStoreError(
+        "storage-unavailable",
+        "This browser is not allowing local demo storage. Your changes only last for this session.",
+      );
+    }
+    if (persistenceMode === "corrupt") {
+      return new DemoStoreError(
+        "storage-corrupt",
+        "Saved demo data could not be read. Reset the demo to replace it; current changes only last for this session.",
+      );
+    }
+    return null;
+  };
+
   const publish = (error: DemoStoreError | null = null) => {
-    snapshot = toSnapshot(data, hydrated, error, getNow());
+    snapshot = toSnapshot(data, hydrated, error ?? persistenceWarning(), getNow());
     listeners.forEach((listener) => listener());
   };
 
@@ -442,6 +502,7 @@ export function createDemoStore(options: CreateDemoStoreOptions = {}): DemoStore
       if (event.key !== DEMO_STORAGE_KEY) return;
       if (event.newValue === null) {
         data = buildSeedData(getNow());
+        persistenceMode = "persistent";
         publish(null);
         return;
       }
@@ -449,14 +510,11 @@ export function createDemoStore(options: CreateDemoStoreOptions = {}): DemoStore
         const parsed: unknown = JSON.parse(event.newValue);
         if (!isPersistedDemoData(parsed)) throw new Error("Invalid storage event payload.");
         data = parsed;
+        persistenceMode = "persistent";
         publish(null);
       } catch {
-        publish(
-          new DemoStoreError(
-            "storage-corrupt",
-            "An update from another tab could not be read. Reset the demo to start fresh.",
-          ),
-        );
+        persistenceMode = "corrupt";
+        publish(null);
       }
     });
     storageListenerAttached = true;
@@ -478,21 +536,22 @@ export function createDemoStore(options: CreateDemoStoreOptions = {}): DemoStore
         writeStoredData(seeded);
       } catch (error) {
         data = seeded;
-        publish(error instanceof DemoStoreError ? error : storageError(error));
+        const demoError = error instanceof DemoStoreError ? error : storageError(error);
+        if (demoError.code === "storage-unavailable") persistenceMode = "session";
+        publish(demoError);
         return;
       }
       data = seeded;
       publish(null);
     } catch (error) {
-      if (error instanceof DemoStoreError && error.code === "storage-corrupt") {
-        data = {
-          ...buildSeedData(getNow()),
-          sightings: [],
-          confirmations: [],
-          submissions: {},
-        };
+      const demoError = error instanceof DemoStoreError ? error : storageError(error);
+      if (demoError.code === "storage-corrupt") {
+        persistenceMode = "corrupt";
+        data = buildSeedData(getNow());
+      } else {
+        persistenceMode = "session";
       }
-      publish(error instanceof DemoStoreError ? error : storageError(error));
+      publish(demoError);
     }
   };
 
@@ -501,10 +560,16 @@ export function createDemoStore(options: CreateDemoStoreOptions = {}): DemoStore
   };
 
   const commit = (next: PersistedDemoData): void => {
+    if (persistenceMode !== "persistent") {
+      data = next;
+      publish(null);
+      return;
+    }
     try {
       writeStoredData(next);
     } catch (error) {
       const demoError = error instanceof DemoStoreError ? error : storageError(error);
+      if (demoError.code === "storage-unavailable") persistenceMode = "session";
       publish(demoError);
       throw demoError;
     }
@@ -522,7 +587,8 @@ export function createDemoStore(options: CreateDemoStoreOptions = {}): DemoStore
     hydrate,
     async createSighting(draft) {
       await ensureHydrated();
-      validateDraft(draft);
+      const now = getNow();
+      validateDraft(draft, now);
       if (!data.signedIn) {
         throw new DemoStoreError("unauthorized", "Sign in to add a sighting in the demo.");
       }
@@ -534,7 +600,6 @@ export function createDemoStore(options: CreateDemoStoreOptions = {}): DemoStore
         if (existing) return existing;
       }
 
-      const now = getNow();
       const sighting: Sighting = {
         id: makeId("sighting", now),
         author: { id: data.profile.id, displayName: data.profile.displayName },
@@ -587,6 +652,12 @@ export function createDemoStore(options: CreateDemoStoreOptions = {}): DemoStore
       if (sighting.author.id === data.profile.id) {
         throw new DemoStoreError("self-confirmation", "You cannot confirm your own sighting.");
       }
+      if (getNow() - Date.parse(sighting.observedAt) > ACTIVE_WINDOW_MS) {
+        throw new DemoStoreError(
+          "validation",
+          "This sighting is more than an hour old and can no longer be confirmed.",
+        );
+      }
       const existing = data.confirmations.find(
         (confirmation) => confirmation.sightingId === sightingId && confirmation.userId === data.profile.id,
       );
@@ -636,6 +707,20 @@ export function createDemoStore(options: CreateDemoStoreOptions = {}): DemoStore
     async reset() {
       await ensureHydrated();
       const resetData = buildSeedData(getNow());
+      if (persistenceMode === "corrupt") {
+        try {
+          writeStoredData(resetData);
+          persistenceMode = "persistent";
+          data = resetData;
+          publish(null);
+        } catch (error) {
+          const demoError = error instanceof DemoStoreError ? error : storageError(error);
+          if (demoError.code === "storage-unavailable") persistenceMode = "session";
+          publish(demoError);
+          throw demoError;
+        }
+        return;
+      }
       commit(resetData);
     },
   };
